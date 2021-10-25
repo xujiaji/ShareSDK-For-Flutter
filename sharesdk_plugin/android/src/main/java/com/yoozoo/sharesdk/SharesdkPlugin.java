@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
 import com.mob.MobSDK;
 import com.mob.OperationCallback;
 import com.mob.PrivacyPolicy;
@@ -25,6 +28,9 @@ import cn.sharesdk.framework.PlatformActionListener;
 import cn.sharesdk.framework.ShareSDK;
 import cn.sharesdk.framework.loopshare.LoopShareResultListener;
 import cn.sharesdk.onekeyshare.OnekeyShare;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -35,7 +41,7 @@ import io.flutter.plugin.common.PluginRegistry;
 /**
  * SharesdkPlugin
  */
-public class SharesdkPlugin implements MethodCallHandler {
+public class SharesdkPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
 
   private static final String PluginMethodGetVersion = "getVersion";
   private static final String PluginMethodShare = "share";
@@ -64,6 +70,40 @@ public class SharesdkPlugin implements MethodCallHandler {
   private static final String TAG = "SHARESDK";
 
 
+  @Override
+  public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+    final MethodChannel channel = new MethodChannel(binding.getBinaryMessenger(),
+            "com.yoozoo.mob/sharesdk");
+    channel.setMethodCallHandler(new SharesdkPlugin());
+    eventChannel = new EventChannel(binding.getBinaryMessenger(), EVENTCHANNEL);
+    withRegister();
+  }
+
+  @Override
+  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+
+  }
+
+  @Override
+  public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+    activity = binding.getActivity();
+  }
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+
+  }
+
+  @Override
+  public void onDetachedFromActivity() {
+
+  }
+
   /**
    * Plugin registration.
    */
@@ -75,6 +115,10 @@ public class SharesdkPlugin implements MethodCallHandler {
     channel.setMethodCallHandler(new SharesdkPlugin());
 
     eventChannel = new EventChannel(registrar.messenger(), EVENTCHANNEL);
+    withRegister();
+  }
+
+  private static void withRegister() {
     eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
 
       @Override
